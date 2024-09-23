@@ -11,63 +11,70 @@ I formulated various questions and tried to answer them by SQL Queries.
 # Following are my findings with SQL queries used:
 
 **1) Overall Geograpical distribution of MintClassics over the globe-**
-   There are total 4 warehouse located in North,East,West and South with WarehouseCodes 'a','b','c' and 'd' respectively . 
-   Mint Classics Company has 5 offices in USA, France, Japan, Australia and UK.In USA it has 3 offices at San Francisco, NY and Boston; in other nations offices are in respective capitals. 
-   Customers are located across 27 nations in 97 cities. 
+
+There are total 4 warehouse located in North,East,West and South with WarehouseCodes 'a','b','c' and 'd' respectively . 
+
+Mint Classics Company has 5 offices in USA, France, Japan, Australia and UK.In USA it has 3 offices at San Francisco, NY and Boston; in other nations offices are in respective capitals.
+
+Customers are located across 27 nations in 97 cities. 
 
 **2) Product Details-**
-   There are total 110 products of cars in the warehouses. 
-   Warehouse A has highest number of 2002 Suzuki XREO model and lowest number of 1960 BSA Gold Star DBD34 models. 
-   Similarly we get other products quantity details in each warehouse by runnnig the following query :
-   
-   SELECT productName,SUM(quantityInStock) AS totalquantity,warehouseCode
-   FROM products
-   WHERE warehouseCode='a'/'b'/'c'/'d'
-   GROUP BY productName,warehouseCode
-   ORDER BY totalquantity DESC/ASC LIMIT 1;
-   Then to calculate the total number of products sold (Sales Count) by name and product code, following SQL Query can be given -
-   SELECT p.productCode, p.productName, SUM(od.quantityOrdered) AS totalSold
-   FROM products p
-   JOIN orderdetails od ON p.productCode = od.productCode
-   GROUP BY p.productCode;
+There are total 110 products of cars in the warehouses. 
+
+Warehouse A has highest number of 2002 Suzuki XREO model and lowest number of 1960 BSA Gold Star DBD34 models. 
+
+Similarly we get other products quantity details in each warehouse by runnnig the following query :
+
+SELECT productName,SUM(quantityInStock) AS totalquantity,warehouseCode
+FROM products
+WHERE warehouseCode='a'/'b'/'c'/'d'
+GROUP BY productName,warehouseCode
+ORDER BY totalquantity DESC/ASC LIMIT 1;
+
+Then to calculate the total number of products sold (Sales Count) by name and product code, following SQL Query can be given -
+
+SELECT p.productCode, p.productName, SUM(od.quantityOrdered) AS totalSold
+FROM products p
+JOIN orderdetails od ON p.productCode = od.productCode
+GROUP BY p.productCode;
 
 **3) Product Order and Warehouse Insights:**
-   Average shipping time for delivery is found to be 3.75 days.
-   Products that are not shipped can be calculated by following query:
-   SELECT o.orderNumber, od.productCode, p.productLine, p.productName, p.warehouseCode
-   FROM orders o
-   INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
-   INNER JOIN products p ON od.productCode = p.productCode
-   WHERE o.shippedDate IS NULL;
-   
-   Top 5 most unshipped products are 1940 Ford Delivery Sedan,1999 Yamaha Speed Boat, 18th century schooner, Collectable Wooden Train and  America West Airlines B757-200 from warehouses c,d and a.
-   
-   South warehouse with warehouseCode 'd' has the most unshipped products among top 5 unshipped products.
-   
-   Following code gives the details of unshipped products by warehouse:
-   SELECT p.warehouseCode, SUM(od.quantityOrdered) AS totalUnshippedQuantity
-   FROM orders o
-   INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
-   INNER JOIN products p ON od.productCode = p.productCode
-   WHERE o.shippedDate IS NULL
-   GROUP BY p.warehouseCode
-   ORDER BY totalUnshippedQuantity DESC;
-   
-   It tells us that Warehouse having most unshipped products are ranked as- d,c,b,a.
-   Following SQL query gives us the inventory products which are less than stocklevel and are not meeting the stock level demands:
-   SELECT 
-    p.warehouseCode,
-    p.productCode,
-    p.productName,
-    p.quantityInStock AS stockLevel,
-    IFNULL(SUM(od.quantityOrdered), 0) AS totalUnshippedQuantity,
-    (p.quantityInStock - IFNULL(SUM(od.quantityOrdered), 0)) AS availableStock
-    FROM products p
-    LEFT JOIN orderdetails od ON p.productCode = od.productCode
-    LEFT JOIN orders o ON od.orderNumber = o.orderNumber AND o.shippedDate IS NULL
-    GROUP BY p.warehouseCode, p.productCode
-    HAVING availableStock < 0
-    ORDER BY availableStock ASC;
+Average shipping time for delivery is found to be 3.75 days.
+Products that are not shipped can be calculated by following query:
+
+SELECT o.orderNumber, od.productCode, p.productLine, p.productName, p.warehouseCode
+FROM orders o
+INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
+INNER JOIN products p ON od.productCode = p.productCode
+WHERE o.shippedDate IS NULL;
+
+Top 5 most unshipped products are 1940 Ford Delivery Sedan,1999 Yamaha Speed Boat, 18th century schooner, Collectable Wooden Train and  America West Airlines B757-200 from warehouses c,d and a.
+
+South warehouse with warehouseCode 'd' has the most unshipped products among top 5 unshipped products.
+
+Following code gives the details of unshipped products by warehouse:
+
+SELECT p.warehouseCode, SUM(od.quantityOrdered) AS totalUnshippedQuantity
+FROM orders o
+INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
+INNER JOIN products p ON od.productCode = p.productCode
+WHERE o.shippedDate IS NULL
+GROUP BY p.warehouseCode
+ORDER BY totalUnshippedQuantity DESC;
+
+It tells us that Warehouse having most unshipped products are ranked as- d,c,b,a,
+
+Following SQL query gives us the inventory products which are less than stocklevel and are not meeting the stock level demands:
+SELECT 
+p.warehouseCode,p.productCode,p.productName,p.quantityInStock AS stockLevel,
+IFNULL(SUM(od.quantityOrdered), 0) AS totalUnshippedQuantity,
+(p.quantityInStock - IFNULL(SUM(od.quantityOrdered), 0)) AS availableStock
+FROM products p
+LEFT JOIN orderdetails od ON p.productCode = od.productCode
+LEFT JOIN orders o ON od.orderNumber = o.orderNumber AND o.shippedDate IS NULL
+GROUP BY p.warehouseCode, p.productCode
+HAVING availableStock < 0
+ORDER BY availableStock ASC;
 
 Such Products are:
 
@@ -76,6 +83,7 @@ Such Products are:
 1985 Toyota Supra has not been sold yet with total sales quantity as 0.
 
 **4) Relation between customers,nations and warehouse:**
+
 Customers who order the most from a warehouse:
 
 SELECT 
