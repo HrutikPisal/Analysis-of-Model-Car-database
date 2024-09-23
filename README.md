@@ -19,6 +19,7 @@ Mint Classics Company has 5 offices in USA, France, Japan, Australia and UK.In U
 Customers are located across 27 nations in 97 cities. 
 
 **2) Product Details-**
+
 There are total 110 products of cars in the warehouses. 
 
 Warehouse A has highest number of 2002 Suzuki XREO model and lowest number of 1960 BSA Gold Star DBD34 models. 
@@ -39,7 +40,9 @@ JOIN orderdetails od ON p.productCode = od.productCode
 GROUP BY p.productCode;
 
 **3) Product Order and Warehouse Insights:**
+
 Average shipping time for delivery is found to be 3.75 days.
+
 Products that are not shipped can be calculated by following query:
 
 SELECT o.orderNumber, od.productCode, p.productLine, p.productName, p.warehouseCode
@@ -65,6 +68,7 @@ ORDER BY totalUnshippedQuantity DESC;
 It tells us that Warehouse having most unshipped products are ranked as- d,c,b,a,
 
 Following SQL query gives us the inventory products which are less than stocklevel and are not meeting the stock level demands:
+
 SELECT 
 p.warehouseCode,p.productCode,p.productName,p.quantityInStock AS stockLevel,
 IFNULL(SUM(od.quantityOrdered), 0) AS totalUnshippedQuantity,
@@ -100,7 +104,7 @@ GROUP BY c.customerNumber, c.customerName, p.warehouseCode
 ORDER BY totalQuantityOrdered DESC
 LIMIT 1;
 
-- Now to determine the location of warehouse and how they are in demand customers, orders and warehouse table can be used
+Now to determine the location of warehouse and how they are in demand customers, orders and warehouse table can be used
 
 SELECT 
     c.customerNumber,
@@ -115,7 +119,7 @@ INNER JOIN products p ON od.productCode = p.productCode
 GROUP BY c.customerNumber, c.customerName, p.warehouseCode
 ORDER BY c.customerNumber, totalOrders DESC;
 
-- Customers who order the most from a warehouse 
+Customers who order the most from a warehouse
 SELECT 
     c.customerNumber,
     c.customerName,
@@ -130,7 +134,8 @@ GROUP BY c.customerNumber, c.customerName, p.warehouseCode
 ORDER BY totalQuantityOrdered DESC
 LIMIT 1;
 
-- Relation between country and warehouses 
+Relation between country and warehouses 
+
 SELECT 
     c.country,
     p.warehouseCode,
@@ -143,8 +148,9 @@ INNER JOIN products p ON od.productCode = p.productCode
 GROUP BY c.country, p.warehouseCode
 ORDER BY c.country, totalQuantityOrdered DESC;
 
-- Now we can find the most preferred warehouse of a nation inorder to shift the warehouses according to nations
-  SELECT 
+Now we can find the most preferred warehouse of a nation inorder to shift the warehouses according to nations
+
+SELECT 
     t1.country,
     t1.warehouseCode,
     t1.totalQuantityOrdered
@@ -160,7 +166,6 @@ ORDER BY c.country, totalQuantityOrdered DESC;
     GROUP BY c.country, p.warehouseCode
 ) t1
 INNER JOIN (
-    -- Subquery to get the maximum total quantity for each country
     SELECT 
         country,
         MAX(totalQuantityOrdered) AS maxQuantity
@@ -177,6 +182,7 @@ INNER JOIN (
     ) t2
     GROUP BY country
 ) t3 ON t1.country = t3.country AND t1.totalQuantityOrdered = t3.maxQuantity; 
+
 
 # Final Report:
 1) East Warehouse has highest share in product quantity and has 38 type of products.
